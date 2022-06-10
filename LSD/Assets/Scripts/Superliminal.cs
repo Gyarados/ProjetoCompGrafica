@@ -1,10 +1,20 @@
 ﻿using UnityEngine;
-using UnityEngine.InputSystem;
 
+#if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
+using UnityEngine.InputSystem;
+#endif
+
+namespace StarterAssets
+{
+	[RequireComponent(typeof(CharacterController))]
+#if ENABLE_INPUT_SYSTEM && STARTER_ASSETS_PACKAGES_CHECKED
+	[RequireComponent(typeof(PlayerInput))]
+#endif
 public class Superliminal : MonoBehaviour
 {
-	[Header("Controlador")]
-	PlayerControls controls;
+
+	//public InputAction pick;
+	private InputAction pick = new InputAction("pick", binding: "<Mouse>/rightButton");
 
 	[Header("Components")]
 	public Transform target;            // The target object we picked up for scaling
@@ -18,9 +28,28 @@ public class Superliminal : MonoBehaviour
 	float originalScale;                // The original scale of the target objects prior to being resized
 	Vector3 targetScale;                // The scale we want our object to be set to each frame
 
+
+	private CharacterController _controller;
+	private StarterAssetsInputs _input;
+	private GameObject _mainCamera;
+
+
+	private void Awake()
+	{
+		// get a reference to our main camera
+		if (_mainCamera == null)
+		{
+			_mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+		}
+
+		//pick.performed += OnPick;
+	}
+
 	void Start()
 	{
-		controls = new PlayerControls();
+		pick.Enable();
+		_controller = GetComponent<CharacterController>();
+		_input = GetComponent<StarterAssetsInputs>();
 	}
 
 	void Update()
@@ -29,32 +58,46 @@ public class Superliminal : MonoBehaviour
 		ResizeTarget();
 	}
 
+	// void OnPick(InputValue value)
+	// {
+	// 	if(value.isPressed){Debug.Log("if(value.isPressed)");}
+	// 	Debug.Log("Acionado OnPick");
+	// }
+
 	void HandleInput()
 	{
-		// Check for left mouse click
-		if (Input.GetMouseButtonDown(0))
+		
+		// Se trigger de acao (Pick), botao direito do mouse e, acredito,  "E"
+		if (pick.triggered)
 		{
+			Debug.Log("pick.triggered");
 			// If we do not currently have a target
 			if (target == null)
 			{
+				Debug.Log("if (target == null)");
 				// Fire a raycast with the layer mask that only hits potential targets
 				RaycastHit hit;
-				if (Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity, targetMask))
+				if (Physics.Raycast(_mainCamera.transform.position, _mainCamera.transform.forward,
+									 out hit, Mathf.Infinity, targetMask))
 				{
-					// Set our target variable to be the Transform object we hit with our raycast
+					Debug.Log("Target object found!");
 					target = hit.transform;
-
-					// Disable physics for the object
+					// Desliga fisica do obejto
 					target.GetComponent<Rigidbody>().isKinematic = true;
 
-					// Calculate the distance between the camera and the object
-					originalDistance = Vector3.Distance(transform.position, target.position);
+					// Distancia entre camera principal e objeto
+					originalDistance = Vector3.Distance(_mainCamera.transform.position, target.position);
 
 					// Save the original scale of the object into our originalScale Vector3 variabble
 					originalScale = target.localScale.x;
 
 					// Set our target scale to be the same as the original for the time being
 					targetScale = target.localScale;
+				}
+				else
+				{
+					Debug.Log("hit nothing");
+					// Debug.Log("hit layer:"+hit.transform.gameObject.layer);
 				}
 			}
 			// If we DO have a target
@@ -69,6 +112,8 @@ public class Superliminal : MonoBehaviour
 		}
 	}
 
+	
+
 	void ResizeTarget()
 	{
 		// If our target is null
@@ -81,14 +126,15 @@ public class Superliminal : MonoBehaviour
 		// Cast a ray forward from the camera position, ignore the layer that is used to acquire targets
 		// so we don't hit the attached target with our ray
 		RaycastHit hit;
-		if (Physics.Raycast(transform.position, transform.forward, out hit, Mathf.Infinity, ignoreTargetMask))
+		if (Physics.Raycast(_mainCamera.transform.position, _mainCamera.transform.forward,
+				 out hit, Mathf.Infinity, ignoreTargetMask))
 		{
 			// Set the new position of the target by getting the hit point and moving it back a bit
 			// depending on the scale and offset factor
-			target.position = hit.point - transform.forward * offsetFactor * targetScale.x;
+			target.position = hit.point - _mainCamera.transform.forward * offsetFactor * targetScale.x;
 
 			// Calculate the current distance between the camera and the target object
-			float currentDistance = Vector3.Distance(transform.position, target.position);
+			float currentDistance = Vector3.Distance(_mainCamera.transform.position, target.position);
 
 			// Calculate the ratio between the current distance and the original distance
 			float s = currentDistance / originalDistance;
@@ -100,4 +146,6 @@ public class Superliminal : MonoBehaviour
 			target.localScale = targetScale * originalScale;
 		}
 	}
+}
+
 }
