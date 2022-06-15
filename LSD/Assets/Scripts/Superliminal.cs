@@ -23,9 +23,13 @@ public class Superliminal : MonoBehaviour
 	public LayerMask targetMask;        // The layer mask used to hit only potential targets with a raycast
 	public LayerMask ignoreTargetMask;  // The layer mask used to ignore the player and target objects while raycasting
 	public float offsetFactor;          // The offset amount for positioning the object so it doesn't clip into walls
+	public bool scaleHardStop = false;
+	public float _maxScale = 5.0f;
+	public float _minScale = 0.15f;
+	public bool lockRotation = false;
 
 	float originalDistance;             // The original distance between the player camera and the target
-	float originalScale;                // The original scale of the target objects prior to being resized
+	Vector3 originalScale;                // The original scale of the target objects prior to being resized
 	Vector3 targetScale;                // The scale we want our object to be set to each frame
 
 
@@ -74,29 +78,29 @@ public class Superliminal : MonoBehaviour
 			// If we do not currently have a target
 			if (target == null)
 			{
-				Debug.Log("if (target == null)");
-				// Fire a raycast with the layer mask that only hits potential targets
+				// Debug.Log("if (target == null)");
 				RaycastHit hit;
-				if (Physics.Raycast(_mainCamera.transform.position, _mainCamera.transform.forward,
-									 out hit, Mathf.Infinity, targetMask))
+				// Raycast e entao checa se bateu primeiro num gameObject que não os targets, entrando caso s
+				
+				if( Physics.Raycast(_mainCamera.transform.position, _mainCamera.transform.forward, out hit, Mathf.Infinity) &&
+					((1<<hit.transform.gameObject.layer) & ignoreTargetMask) == 0)
 				{
 					Debug.Log("Target object found!");
 					target = hit.transform;
 					// Desliga fisica do obejto
 					target.GetComponent<Rigidbody>().isKinematic = true;
+					target.GetComponent<Collider>().isTrigger = true;
 
 					// Distancia entre camera principal e objeto
 					originalDistance = Vector3.Distance(_mainCamera.transform.position, target.position);
 
-					// Save the original scale of the object into our originalScale Vector3 variabble
-					originalScale = target.localScale.x;
+					originalScale = target.localScale;
 
-					// Set our target scale to be the same as the original for the time being
 					targetScale = target.localScale;
 				}
 				else
 				{
-					Debug.Log("hit nothing");
+					// Debug.Log("hit nothing");
 					// Debug.Log("hit layer:"+hit.transform.gameObject.layer);
 				}
 			}
@@ -105,7 +109,7 @@ public class Superliminal : MonoBehaviour
 			{
 				// Reactivate physics for the target object
 				target.GetComponent<Rigidbody>().isKinematic = false;
-
+				target.GetComponent<Collider>().isTrigger = false;
 				// Set our target variable to null
 				target = null;
 			}
@@ -142,8 +146,26 @@ public class Superliminal : MonoBehaviour
 			// Set the scale Vector3 variable to be the ratio of the distances
 			targetScale.x = targetScale.y = targetScale.z = s;
 
-			// Set the scale for the target objectm, multiplied by the original scale
-			target.localScale = targetScale * originalScale;
+			//Escala final
+			Vector3 finalScale = Vector3.Scale(targetScale, originalScale);
+			if(scaleHardStop){
+				if(finalScale.x > _maxScale){
+					target.localScale = new Vector3(_maxScale, _maxScale, _maxScale); }
+				else if(finalScale.x < _minScale) {
+					target.localScale = new Vector3(_minScale, _minScale, _minScale); }
+				else {target.localScale = finalScale; }
+			}
+			else{//Parte comentada forca o objeto a voltar pro tamanho original
+				// if(finalScale.x > _maxScale){target.localScale = originalScale; }
+				// else if(finalScale.x < _minScale) {target.localScale = originalScale; }
+				// else {target.localScale = finalScale; }
+				target.localScale = finalScale; //Livre para crescer
+			}
+			
+
+			//Corrigindo a rotacao
+			if(lockRotation) target.rotation = _mainCamera.transform.rotation;
+
 		}
 	}
 }
