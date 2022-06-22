@@ -36,7 +36,7 @@ public class Superliminal : MonoBehaviour
 	private CharacterController _controller;
 	private StarterAssetsInputs _input;
 	private GameObject _mainCamera;
-
+	private GameObject _player;
 
 	private void Awake()
 	{
@@ -44,6 +44,10 @@ public class Superliminal : MonoBehaviour
 		if (_mainCamera == null)
 		{
 			_mainCamera = GameObject.FindGameObjectWithTag("MainCamera");
+		}
+		if (_player == null)
+		{
+			_player = GameObject.FindGameObjectWithTag("Player");
 		}
 
 		//pick.performed += OnPick;
@@ -87,9 +91,12 @@ public class Superliminal : MonoBehaviour
 				{
 					Debug.Log("Target object found!");
 					target = hit.transform;
-					// Desliga fisica do obejto
+					// Desliga fisica do objeto
+
+					target.GetComponent<Rigidbody>().useGravity  = false;
 					target.GetComponent<Rigidbody>().isKinematic = true;
-					target.GetComponent<Collider>().isTrigger = true;
+					target.parent = _player.transform;
+					// target.GetComponent<Collider>().isTrigger = true;
 
 					// Distancia entre camera principal e objeto
 					originalDistance = Vector3.Distance(_mainCamera.transform.position, target.position);
@@ -108,8 +115,9 @@ public class Superliminal : MonoBehaviour
 			else
 			{
 				// Reactivate physics for the target object
+				target.GetComponent<Rigidbody>().useGravity  = true;
 				target.GetComponent<Rigidbody>().isKinematic = false;
-				target.GetComponent<Collider>().isTrigger = false;
+				target.parent = null;
 				// Set our target variable to null
 				target = null;
 			}
