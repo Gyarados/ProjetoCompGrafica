@@ -28,6 +28,9 @@ public class Superliminal : MonoBehaviour
 	public float _minScale = 0.15f;
 	public bool lockRotation = false;
 
+	[Header("Audio")]
+	public AudioSource audioSource;
+
 	float originalDistance;             // The original distance between the player camera and the target
 	Vector3 originalScale;                // The original scale of the target objects prior to being resized
 	Vector3 targetScale;                // The scale we want our object to be set to each frame
@@ -51,6 +54,10 @@ public class Superliminal : MonoBehaviour
 		}
 
 		//pick.performed += OnPick;
+
+		//Se houver, pegar fonte de audio
+        audioSource = GetComponent<AudioSource> ();
+
 	}
 
 	void Start()
@@ -104,6 +111,9 @@ public class Superliminal : MonoBehaviour
 					originalScale = target.localScale;
 
 					targetScale = target.localScale;
+
+					// Toca som se houver
+					if(audioSource) audioSource.Play();
 				}
 				else
 				{
