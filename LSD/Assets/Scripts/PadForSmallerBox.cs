@@ -33,6 +33,8 @@ public class PadForSmallerBox : MonoBehaviour
             lockMode = CursorLockMode.None;
             Cursor.lockState = lockMode;
             SceneManager.LoadScene(0);
+            // Chamar proxima cena
+            //GameObject.Find("LevelManager").GetComponent<Transition>().triggerNextLevel = true;
 
             }
 
