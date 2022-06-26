@@ -30,8 +30,14 @@ public class PadForBiggerBox : MonoBehaviour
             Debug.Log("Pressure plate ativada com o tamanho correto!");
 
             // Chamar proxima cena
-            //SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex + 1);
-            GameObject.Find("LevelManager").GetComponent<Transition>().triggerNextLevel = true;    
+            if (SceneManager.GetActiveScene().buildIndex == SceneManager.sceneCountInBuildSettings - 1){
+                CursorLockMode lockMode;
+                lockMode = CursorLockMode.None;
+                Cursor.lockState = lockMode;
+                GameObject.Find("LevelManager").GetComponent<Transition>().triggerMainMenu = true;
+                return;
+            }
+            GameObject.Find("LevelManager").GetComponent<Transition>().triggerNextLevel = true; 
 
             }
 

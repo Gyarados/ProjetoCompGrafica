@@ -29,12 +29,15 @@ public class PadForSmallerBox : MonoBehaviour
             {
             Debug.Log("Pressure plate ativada com o tamanho correto!");
 
-            CursorLockMode lockMode;
-            lockMode = CursorLockMode.None;
-            Cursor.lockState = lockMode;
-            SceneManager.LoadScene(0);
             // Chamar proxima cena
-            //GameObject.Find("LevelManager").GetComponent<Transition>().triggerNextLevel = true;
+            if (SceneManager.GetActiveScene().buildIndex == SceneManager.sceneCountInBuildSettings - 1){
+                CursorLockMode lockMode;
+                lockMode = CursorLockMode.None;
+                Cursor.lockState = lockMode;
+                GameObject.Find("LevelManager").GetComponent<Transition>().triggerMainMenu = true;
+                return;
+            }
+            GameObject.Find("LevelManager").GetComponent<Transition>().triggerNextLevel = true;
 
             }
 

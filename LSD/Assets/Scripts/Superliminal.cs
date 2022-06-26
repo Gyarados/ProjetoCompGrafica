@@ -41,6 +41,9 @@ public class Superliminal : MonoBehaviour
 	private GameObject _mainCamera;
 	private GameObject _player;
 
+	GameObject glasses;
+	GameObject glasses_table;
+	
 	private void Awake()
 	{
 		// get a reference to our main camera
@@ -52,7 +55,17 @@ public class Superliminal : MonoBehaviour
 		{
 			_player = GameObject.FindGameObjectWithTag("Player");
 		}
-
+		if (glasses == null)
+		{
+			glasses = GameObject.Find("oculos");
+			if (glasses != null){
+				glasses.SetActive(false);
+			}
+		}
+		if (glasses_table == null)
+		{
+			glasses_table = GameObject.Find("oculos_mesa");
+		}
 		//pick.performed += OnPick;
 
 		//Se houver, pegar fonte de audio
@@ -97,7 +110,15 @@ public class Superliminal : MonoBehaviour
 					((1<<hit.transform.gameObject.layer) & ignoreTargetMask) == 0)
 				{
 					Debug.Log("Target object found!");
+
 					target = hit.transform;
+					
+					if (target.tag == "PickupGlasses"){
+						target = null;
+						glasses.SetActive(true);
+						glasses_table.SetActive(false);
+						return;
+					}  
 					// Desliga fisica do objeto
 
 					target.GetComponent<Rigidbody>().useGravity  = false;

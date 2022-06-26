@@ -7,6 +7,7 @@ public class Transition : MonoBehaviour
 {
     public Animator animator;
     public bool triggerNextLevel = false;
+    public bool triggerMainMenu = false;
     public float transitionDelayTime = 1.0f;
 
     void Awake()
@@ -25,11 +26,21 @@ public class Transition : MonoBehaviour
             LoadNextLevel();
             triggerNextLevel = false;
         }
+        if(triggerMainMenu)
+        {
+            LoadMainMenu();
+            triggerMainMenu = false;
+        }
     }
 
     public void LoadNextLevel()
     {
         StartCoroutine(DelayLoadLevel(SceneManager.GetActiveScene().buildIndex + 1));
+    }
+
+    public void LoadMainMenu()
+    {
+        StartCoroutine(DelayLoadLevel(0));
     }
 
     IEnumerator DelayLoadLevel(int index)
