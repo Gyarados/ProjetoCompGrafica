@@ -30,6 +30,7 @@ public class PadForBiggerBox : MonoBehaviour
             Debug.Log("Pressure plate ativada com o tamanho correto!");
 
             // Chamar proxima cena
+            //`{Otavio}: isso ficaria melhor em LevelManager (Transition.cs), assim qualquer trigger de cena lancaria para o menu caso a cena seja a ultima
             if (SceneManager.GetActiveScene().buildIndex == SceneManager.sceneCountInBuildSettings - 1){
                 CursorLockMode lockMode;
                 lockMode = CursorLockMode.None;
